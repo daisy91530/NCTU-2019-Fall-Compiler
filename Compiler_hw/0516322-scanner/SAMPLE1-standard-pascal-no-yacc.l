@@ -47,13 +47,17 @@
 #define   STAR      38
 #define   NOT      39
 #define   DOTDOT      40
+#define   COMMENT     41
+#define   AND     42
+#define   OR    43
 
 int line_no = 1;
-
+int i=0;
 
 %}
 
-%x COMMENT
+%x COMMENTSPACE
+%x PLUSSPACE
 A [aA]
 B [bB]
 C [cC]
@@ -100,6 +104,8 @@ Z [zZ]
 {W}{H}{I}{L}{E}              return(WHILE);
 {D}{O}                       return(DO);
 {N}{O}{T}                    return(NOT);
+{O}{R}                       return(OR);
+{A}{N}{D}                    return(AND);
 [a-zA-Z]([a-zA-Z0-9\_])*     return(IDENTIFIER);
 
 ":="                         return(ASSIGNMENT);
@@ -118,25 +124,82 @@ Z [zZ]
 "-"                          return(MINUS);
 "+"                          return(PLUS);
 "]"                          return(RBRAC);
-[-+]?[1-9][0-9]*|[0]          return(NUM);
-[-+]?[0-9]*[.][0-9]*          return(NUM);
-([-+]?[1-9][0-9]*|[0]|[-]?[0-9]*[.][0-9]*)[eE][\+\-]?[0-9]+ return(NUM);
 ")"                          return(RPAREN);
 ";"                          return(SEMICOLON);
 "/"                          return(SLASH);
 "*"                          return(STAR);
+[-+]?[1-9][0-9]*|[0]         {BEGIN PLUSSPACE;return(NUM);}
+[-+]?[0-9]+[.][0-9]+         {BEGIN PLUSSPACE;return(NUM);}
+([-+]?[1-9][0-9]*|[0]|[-]?[0-9]*[.][0-9]*)[eE][\+\-]?[0-9]+ {BEGIN PLUSSPACE;return(NUM);}
+
+<PLUSSPACE>"+"                          {BEGIN 0;return(PLUS);}
+<PLUSSPACE>"-"                          {BEGIN 0;return(MINUS);}
+<PLUSSPACE>"/"                          {BEGIN 0;return(SLASH);}
+<PLUSSPACE>"*"                          {BEGIN 0;return(STAR);}
+<PLUSSPACE>\n                           {++line_no; BEGIN 0;}
+<PLUSSPACE>{P}{R}{O}{G}{R}{A}{M}        {BEGIN 0;return(PROGRAM);}
+<PLUSSPACE>{I}{D}                       {BEGIN 0;return(IDENTIFIER);}
+<PLUSSPACE>{V}{A}{R}                    {BEGIN 0;return(VAR);}
+<PLUSSPACE>{A}{R}{R}{A}{Y}              {BEGIN 0;return(ARRAY);}
+<PLUSSPACE>{O}{F}                       {BEGIN 0;return(OF);}
+<PLUSSPACE>{I}{N}{T}{E}{G}{E}{R}        {BEGIN 0;return(INTEGER);}
+<PLUSSPACE>{R}{E}{A}{L}                 {BEGIN 0;return(REAL);}
+<PLUSSPACE>{F}{U}{N}{C}{T}{I}{O}{N}     {BEGIN 0;return(FUNCTION);}
+<PLUSSPACE>{P}{R}{O}{C}{E}{D}{U}{R}{E}  {BEGIN 0;return(PROCEDURE);}
+<PLUSSPACE>{B}{E}{G}{I}{N}              {BEGIN 0;return(PBEGIN);}
+<PLUSSPACE>{E}{N}{D}                    {BEGIN 0;return(END);}
+<PLUSSPACE>{I}{F}                       {BEGIN 0;return(IF);}
+<PLUSSPACE>{T}{H}{E}{N}                 {BEGIN 0;return(THEN);}
+<PLUSSPACE>{E}{L}{S}{E}                 {BEGIN 0;return(ELSE);}
+<PLUSSPACE>{W}{H}{I}{L}{E}              {BEGIN 0;return(WHILE);}
+<PLUSSPACE>{D}{O}                        {BEGIN 0;return(DO);}
+<PLUSSPACE>{N}{O}{T}                    {BEGIN 0;return(NOT);}
+<PLUSSPACE>{O}{R}                        {BEGIN 0;return(OR);}
+<PLUSSPACE>{A}{N}{D}                    {BEGIN 0;return(AND);}
+<PLUSSPACE>[a-zA-Z]([a-zA-Z0-9\_])*     {BEGIN 0;return(IDENTIFIER);}
+<PLUSSPACE>":="                         {BEGIN 0;return(ASSIGNMENT);}
+<PLUSSPACE>":"                          {BEGIN 0;return(COLON);}
+<PLUSSPACE>","                          {BEGIN 0;return(COMMA);}
+<PLUSSPACE>"."                          {BEGIN 0;return(DOT);}
+<PLUSSPACE>".."                         {BEGIN 0;return(DOTDOT);}
+<PLUSSPACE>"="                          {BEGIN 0;return(EQUAL);}
+<PLUSSPACE>"!="                         {BEGIN 0;return(notEQUAL);}
+<PLUSSPACE>">="                         {BEGIN 0;return(GE);}
+<PLUSSPACE>">"                          {BEGIN 0;return(GT);}
+<PLUSSPACE>"["                          {BEGIN 0;return(LBRAC);}
+<PLUSSPACE>"<="                         {BEGIN 0;return(LE);}
+<PLUSSPACE>"("                          {BEGIN 0;return(LPAREN);}
+<PLUSSPACE>"<"                          {BEGIN 0;return(LT);}
+<PLUSSPACE>"]"                          {BEGIN 0;return(RBRAC);}
+<PLUSSPACE>")"                          {BEGIN 0;return(RPAREN);}
+<PLUSSPACE>";"                          {BEGIN 0;return(SEMICOLON);}
+<PLUSSPACE>"//".*[\r\n]                 {fprintf (stderr, "%3d-th token(type:%d) on line %d : %s",i, COMMENT,line_no, yytext);
+                                        i++;
+                                        line_no++;
+                                        BEGIN 0;}
+<PLUSSPACE>"/*"                         {fprintf (stderr, "%3d-th token(type:%d) on line %d : %s",i, COMMENT,line_no, yytext);
+                                        BEGIN COMMENTSPACE;}
+<PLUSSPACE>[\"]([^\"\n])*[\"]           {BEGIN 0;return (STRINGCONSTANT);}
+<PLUSSPACE>[\"][^\n"]*                  {fprintf(stderr, "string error at line %d : %s\n",line_no,yytext);BEGIN 0;}
+<PLUSSPACE>[ \t\f]                      {BEGIN 0;}
+<PLUSSPACE>\r                           {BEGIN 0;}
+<PLUSSPACE>.                            {fprintf(stderr,"Lexical analyzer error at line %d : %s\n",line_no,yytext);BEGIN 0;}
+
+
 
 "//".*[\r\n]  {
-                fprintf (stderr, "This is a C++ style comment at line %d: %s",line_no, yytext);
+                fprintf (stderr, "%3d-th token(type:%d) on line %d : %s",i, COMMENT,line_no, yytext);
+                i++;
                 line_no++;
               }
-
-"/*" {BEGIN COMMENT;}
-<COMMENT>[^*\n]*
-<COMMENT>"*"+[^*/\n]*
-<COMMENT>\n           ++line_no;
-<COMMENT>"*/" {fprintf (stderr, "This is a C style comment ends at line %d\n",line_no);
-                BEGIN 0;}
+"/*"                                    {fprintf (stderr, "%3d-th token(type:%d) on line %d : %s",i, COMMENT,line_no, yytext);
+                                                  BEGIN COMMENTSPACE;}
+<COMMENTSPACE>[^*\n]*                   {fprintf (stderr, "%s",yytext);}
+<COMMENTSPACE>"*"+[^*/\n]*              {fprintf (stderr, "%s",yytext);}
+<COMMENTSPACE>\n                        {fprintf (stderr, "%s",yytext); 
+                                                            ++line_no;}
+<COMMENTSPACE>"*/" {fprintf (stderr, "%s\n",yytext);
+                                                  BEGIN 0; return(COMMENT); }
 
 [\"]([^\"\n])*[\"]       return (STRINGCONSTANT);
 [\"][^\n"]*              {
@@ -156,12 +219,13 @@ Z [zZ]
 %%
 
 int main(int argc, char** argv) {
-  int i, tok;
+  int tok;
   yyin = fopen("test.txt", "r");
   for (i = 0; 1==1; i ++) {
     tok = yylex();
-    fprintf(stderr, "%3d-th token(type:%d) on line %d : %s\n", i, tok,line_no, yytext);
-    
+    if(tok!=COMMENT){
+      fprintf(stderr, "%3d-th token(type:%d) on line %d : %s\n", i, tok,line_no, yytext);
+    }
   }
   return(0);
 } /* end of main */
