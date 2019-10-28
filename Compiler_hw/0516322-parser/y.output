@@ -1,0 +1,1439 @@
+   0  $accept : prog $end
+
+   1  prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT
+
+   2  identifier_list : IDENTIFIER
+   3                  | identifier_list COMMA IDENTIFIER
+
+   4  declarations : declarations VAR identifier_list COLON type SEMICOLON
+   5               |
+
+   6  type : standard_type
+   7       | ARRAY LBRAC number DOTDOT number RBRAC OF type
+
+   8  standard_type : INTEGER
+   9                | REAL
+  10                | STRINGCONSTANT
+
+  11  subprogram_declarations : subprogram_declarations subprogram_declaration SEMICOLON
+  12                          |
+
+  13  subprogram_declaration : subprogram_head declarations subprogram_declarations compound_statement
+
+  14  subprogram_head : FUNCTION IDENTIFIER arguments COLON standard_type SEMICOLON
+  15                  | PROCEDURE IDENTIFIER arguments SEMICOLON
+
+  16  arguments : LPAREN parameter_list RPAREN
+  17            |
+
+  18  parameter_list : optional_var identifier_list COLON type
+  19                 | optional_var identifier_list COLON type SEMICOLON parameter_list
+
+  20  optional_var : VAR
+  21               |
+
+  22  compound_statement : PBEGIN optional_statements END
+
+  23  optional_statements : statement_list
+
+  24  statement_list : statement
+  25                 | statement_list SEMICOLON statement
+
+  26  statement : variable ASSIGNMENT expression
+  27            | procedure_statement
+  28            | compound_statement
+  29            | IF expression THEN statement ELSE statement
+  30            | WHILE expression DO statement
+  31            |
+
+  32  variable : IDENTIFIER tail
+
+  33  tail : LBRAC expression RBRAC tail
+  34       |
+
+  35  procedure_statement : IDENTIFIER
+  36                      | IDENTIFIER LPAREN expression_list RPAREN
+
+  37  expression_list : expression
+  38                  | expression_list COMMA expression
+
+  39  expression : boolexpression
+  40             | boolexpression AND boolexpression
+  41             | boolexpression OR boolexpression
+
+  42  boolexpression : simple_expression
+  43                 | simple_expression relop simple_expression
+
+  44  simple_expression : term
+  45                    | simple_expression addop term
+
+  46  term : factor
+  47       | term mulop factor
+
+  48  factor : IDENTIFIER tail
+  49         | IDENTIFIER LPAREN expression_list RPAREN
+  50         | number
+  51         | STRINGCONSTANT
+  52         | LPAREN expression RPAREN
+  53         | NOT factor
+
+  54  addop : PLUS
+  55        | MINUS
+
+  56  mulop : STAR
+  57        | SLASH
+
+  58  relop : LT
+  59        | GT
+  60        | EQUAL
+  61        | LE
+  62        | GE
+  63        | notEQUAL
+
+  64  number : NUM
+  65         | addop NUM
+
+state 0
+	$accept : . prog $end  (0)
+
+	PROGRAM  shift 1
+	.  error
+
+	prog  goto 2
+
+
+state 1
+	prog : PROGRAM . IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT  (1)
+
+	IDENTIFIER  shift 3
+	.  error
+
+
+state 2
+	$accept : prog . $end  (0)
+
+	$end  accept
+
+
+state 3
+	prog : PROGRAM IDENTIFIER . LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT  (1)
+
+	LPAREN  shift 4
+	.  error
+
+
+state 4
+	prog : PROGRAM IDENTIFIER LPAREN . identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT  (1)
+
+	IDENTIFIER  shift 5
+	.  error
+
+	identifier_list  goto 6
+
+
+state 5
+	identifier_list : IDENTIFIER .  (2)
+
+	.  reduce 2
+
+
+state 6
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list . RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT  (1)
+	identifier_list : identifier_list . COMMA IDENTIFIER  (3)
+
+	RPAREN  shift 7
+	COMMA  shift 8
+	.  error
+
+
+state 7
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN . SEMICOLON declarations subprogram_declarations compound_statement DOT  (1)
+
+	SEMICOLON  shift 9
+	.  error
+
+
+state 8
+	identifier_list : identifier_list COMMA . IDENTIFIER  (3)
+
+	IDENTIFIER  shift 10
+	.  error
+
+
+state 9
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON . declarations subprogram_declarations compound_statement DOT  (1)
+	declarations : .  (5)
+
+	.  reduce 5
+
+	declarations  goto 11
+
+
+state 10
+	identifier_list : identifier_list COMMA IDENTIFIER .  (3)
+
+	.  reduce 3
+
+
+state 11
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations . subprogram_declarations compound_statement DOT  (1)
+	declarations : declarations . VAR identifier_list COLON type SEMICOLON  (4)
+	subprogram_declarations : .  (12)
+
+	VAR  shift 12
+	FUNCTION  reduce 12
+	PROCEDURE  reduce 12
+	PBEGIN  reduce 12
+
+	subprogram_declarations  goto 13
+
+
+state 12
+	declarations : declarations VAR . identifier_list COLON type SEMICOLON  (4)
+
+	IDENTIFIER  shift 5
+	.  error
+
+	identifier_list  goto 14
+
+
+state 13
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations . compound_statement DOT  (1)
+	subprogram_declarations : subprogram_declarations . subprogram_declaration SEMICOLON  (11)
+
+	FUNCTION  shift 15
+	PROCEDURE  shift 16
+	PBEGIN  shift 17
+	.  error
+
+	compound_statement  goto 18
+	subprogram_declaration  goto 19
+	subprogram_head  goto 20
+
+
+state 14
+	identifier_list : identifier_list . COMMA IDENTIFIER  (3)
+	declarations : declarations VAR identifier_list . COLON type SEMICOLON  (4)
+
+	COMMA  shift 8
+	COLON  shift 21
+	.  error
+
+
+state 15
+	subprogram_head : FUNCTION . IDENTIFIER arguments COLON standard_type SEMICOLON  (14)
+
+	IDENTIFIER  shift 22
+	.  error
+
+
+state 16
+	subprogram_head : PROCEDURE . IDENTIFIER arguments SEMICOLON  (15)
+
+	IDENTIFIER  shift 23
+	.  error
+
+
+state 17
+	compound_statement : PBEGIN . optional_statements END  (22)
+	statement : .  (31)
+
+	IDENTIFIER  shift 24
+	PBEGIN  shift 17
+	IF  shift 25
+	WHILE  shift 26
+	SEMICOLON  reduce 31
+	END  reduce 31
+
+	compound_statement  goto 27
+	optional_statements  goto 28
+	statement_list  goto 29
+	statement  goto 30
+	variable  goto 31
+	procedure_statement  goto 32
+
+
+state 18
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement . DOT  (1)
+
+	DOT  shift 33
+	.  error
+
+
+state 19
+	subprogram_declarations : subprogram_declarations subprogram_declaration . SEMICOLON  (11)
+
+	SEMICOLON  shift 34
+	.  error
+
+
+state 20
+	subprogram_declaration : subprogram_head . declarations subprogram_declarations compound_statement  (13)
+	declarations : .  (5)
+
+	.  reduce 5
+
+	declarations  goto 35
+
+
+state 21
+	declarations : declarations VAR identifier_list COLON . type SEMICOLON  (4)
+
+	ARRAY  shift 36
+	STRINGCONSTANT  shift 37
+	INTEGER  shift 38
+	REAL  shift 39
+	.  error
+
+	type  goto 40
+	standard_type  goto 41
+
+
+state 22
+	subprogram_head : FUNCTION IDENTIFIER . arguments COLON standard_type SEMICOLON  (14)
+	arguments : .  (17)
+
+	LPAREN  shift 42
+	COLON  reduce 17
+
+	arguments  goto 43
+
+
+state 23
+	subprogram_head : PROCEDURE IDENTIFIER . arguments SEMICOLON  (15)
+	arguments : .  (17)
+
+	LPAREN  shift 42
+	SEMICOLON  reduce 17
+
+	arguments  goto 44
+
+
+state 24
+	variable : IDENTIFIER . tail  (32)
+	procedure_statement : IDENTIFIER .  (35)
+	procedure_statement : IDENTIFIER . LPAREN expression_list RPAREN  (36)
+	tail : .  (34)
+
+	LPAREN  shift 45
+	LBRAC  shift 46
+	SEMICOLON  reduce 35
+	END  reduce 35
+	ASSIGNMENT  reduce 34
+	ELSE  reduce 35
+
+	tail  goto 47
+
+
+state 25
+	statement : IF . expression THEN statement ELSE statement  (29)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 56
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 26
+	statement : WHILE . expression DO statement  (30)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 62
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 27
+	statement : compound_statement .  (28)
+
+	.  reduce 28
+
+
+state 28
+	compound_statement : PBEGIN optional_statements . END  (22)
+
+	END  shift 63
+	.  error
+
+
+state 29
+	optional_statements : statement_list .  (23)
+	statement_list : statement_list . SEMICOLON statement  (25)
+
+	SEMICOLON  shift 64
+	END  reduce 23
+
+
+state 30
+	statement_list : statement .  (24)
+
+	.  reduce 24
+
+
+state 31
+	statement : variable . ASSIGNMENT expression  (26)
+
+	ASSIGNMENT  shift 65
+	.  error
+
+
+state 32
+	statement : procedure_statement .  (27)
+
+	.  reduce 27
+
+
+state 33
+	prog : PROGRAM IDENTIFIER LPAREN identifier_list RPAREN SEMICOLON declarations subprogram_declarations compound_statement DOT .  (1)
+
+	.  reduce 1
+
+
+state 34
+	subprogram_declarations : subprogram_declarations subprogram_declaration SEMICOLON .  (11)
+
+	.  reduce 11
+
+
+state 35
+	declarations : declarations . VAR identifier_list COLON type SEMICOLON  (4)
+	subprogram_declaration : subprogram_head declarations . subprogram_declarations compound_statement  (13)
+	subprogram_declarations : .  (12)
+
+	VAR  shift 12
+	FUNCTION  reduce 12
+	PROCEDURE  reduce 12
+	PBEGIN  reduce 12
+
+	subprogram_declarations  goto 66
+
+
+state 36
+	type : ARRAY . LBRAC number DOTDOT number RBRAC OF type  (7)
+
+	LBRAC  shift 67
+	.  error
+
+
+state 37
+	standard_type : STRINGCONSTANT .  (10)
+
+	.  reduce 10
+
+
+state 38
+	standard_type : INTEGER .  (8)
+
+	.  reduce 8
+
+
+state 39
+	standard_type : REAL .  (9)
+
+	.  reduce 9
+
+
+state 40
+	declarations : declarations VAR identifier_list COLON type . SEMICOLON  (4)
+
+	SEMICOLON  shift 68
+	.  error
+
+
+state 41
+	type : standard_type .  (6)
+
+	.  reduce 6
+
+
+state 42
+	arguments : LPAREN . parameter_list RPAREN  (16)
+	optional_var : .  (21)
+
+	VAR  shift 69
+	IDENTIFIER  reduce 21
+
+	parameter_list  goto 70
+	optional_var  goto 71
+
+
+state 43
+	subprogram_head : FUNCTION IDENTIFIER arguments . COLON standard_type SEMICOLON  (14)
+
+	COLON  shift 72
+	.  error
+
+
+state 44
+	subprogram_head : PROCEDURE IDENTIFIER arguments . SEMICOLON  (15)
+
+	SEMICOLON  shift 73
+	.  error
+
+
+state 45
+	procedure_statement : IDENTIFIER LPAREN . expression_list RPAREN  (36)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 74
+	expression_list  goto 75
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 46
+	tail : LBRAC . expression RBRAC tail  (33)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 76
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 47
+	variable : IDENTIFIER tail .  (32)
+
+	.  reduce 32
+
+
+state 48
+	factor : IDENTIFIER . tail  (48)
+	factor : IDENTIFIER . LPAREN expression_list RPAREN  (49)
+	tail : .  (34)
+
+	LPAREN  shift 77
+	LBRAC  shift 46
+	RPAREN  reduce 34
+	SEMICOLON  reduce 34
+	COMMA  reduce 34
+	RBRAC  reduce 34
+	END  reduce 34
+	THEN  reduce 34
+	ELSE  reduce 34
+	DO  reduce 34
+	GE  reduce 34
+	GT  reduce 34
+	LE  reduce 34
+	LT  reduce 34
+	EQUAL  reduce 34
+	MINUS  reduce 34
+	notEQUAL  reduce 34
+	PLUS  reduce 34
+	SLASH  reduce 34
+	STAR  reduce 34
+	AND  reduce 34
+	OR  reduce 34
+
+	tail  goto 78
+
+
+state 49
+	factor : LPAREN . expression RPAREN  (52)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 79
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 50
+	number : NUM .  (64)
+
+	.  reduce 64
+
+
+state 51
+	factor : STRINGCONSTANT .  (51)
+
+	.  reduce 51
+
+
+state 52
+	addop : MINUS .  (55)
+
+	.  reduce 55
+
+
+state 53
+	addop : PLUS .  (54)
+
+	.  reduce 54
+
+
+state 54
+	factor : NOT . factor  (53)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	addop  goto 60
+	factor  goto 80
+
+
+state 55
+	factor : number .  (50)
+
+	.  reduce 50
+
+
+state 56
+	statement : IF expression . THEN statement ELSE statement  (29)
+
+	THEN  shift 81
+	.  error
+
+
+state 57
+	expression : boolexpression .  (39)
+	expression : boolexpression . AND boolexpression  (40)
+	expression : boolexpression . OR boolexpression  (41)
+
+	AND  shift 82
+	OR  shift 83
+	RPAREN  reduce 39
+	SEMICOLON  reduce 39
+	COMMA  reduce 39
+	RBRAC  reduce 39
+	END  reduce 39
+	THEN  reduce 39
+	ELSE  reduce 39
+	DO  reduce 39
+
+
+state 58
+	boolexpression : simple_expression .  (42)
+	boolexpression : simple_expression . relop simple_expression  (43)
+	simple_expression : simple_expression . addop term  (45)
+
+	GE  shift 84
+	GT  shift 85
+	LE  shift 86
+	LT  shift 87
+	EQUAL  shift 88
+	MINUS  shift 52
+	notEQUAL  shift 89
+	PLUS  shift 53
+	RPAREN  reduce 42
+	SEMICOLON  reduce 42
+	COMMA  reduce 42
+	RBRAC  reduce 42
+	END  reduce 42
+	THEN  reduce 42
+	ELSE  reduce 42
+	DO  reduce 42
+	AND  reduce 42
+	OR  reduce 42
+
+	relop  goto 90
+	addop  goto 91
+
+
+state 59
+	simple_expression : term .  (44)
+	term : term . mulop factor  (47)
+
+	SLASH  shift 92
+	STAR  shift 93
+	RPAREN  reduce 44
+	SEMICOLON  reduce 44
+	COMMA  reduce 44
+	RBRAC  reduce 44
+	END  reduce 44
+	THEN  reduce 44
+	ELSE  reduce 44
+	DO  reduce 44
+	GE  reduce 44
+	GT  reduce 44
+	LE  reduce 44
+	LT  reduce 44
+	EQUAL  reduce 44
+	MINUS  reduce 44
+	notEQUAL  reduce 44
+	PLUS  reduce 44
+	AND  reduce 44
+	OR  reduce 44
+
+	mulop  goto 94
+
+
+state 60
+	number : addop . NUM  (65)
+
+	NUM  shift 95
+	.  error
+
+
+state 61
+	term : factor .  (46)
+
+	.  reduce 46
+
+
+state 62
+	statement : WHILE expression . DO statement  (30)
+
+	DO  shift 96
+	.  error
+
+
+state 63
+	compound_statement : PBEGIN optional_statements END .  (22)
+
+	.  reduce 22
+
+
+state 64
+	statement_list : statement_list SEMICOLON . statement  (25)
+	statement : .  (31)
+
+	IDENTIFIER  shift 24
+	PBEGIN  shift 17
+	IF  shift 25
+	WHILE  shift 26
+	SEMICOLON  reduce 31
+	END  reduce 31
+
+	compound_statement  goto 27
+	statement  goto 97
+	variable  goto 31
+	procedure_statement  goto 32
+
+
+state 65
+	statement : variable ASSIGNMENT . expression  (26)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 98
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 66
+	subprogram_declarations : subprogram_declarations . subprogram_declaration SEMICOLON  (11)
+	subprogram_declaration : subprogram_head declarations subprogram_declarations . compound_statement  (13)
+
+	FUNCTION  shift 15
+	PROCEDURE  shift 16
+	PBEGIN  shift 17
+	.  error
+
+	compound_statement  goto 99
+	subprogram_declaration  goto 19
+	subprogram_head  goto 20
+
+
+state 67
+	type : ARRAY LBRAC . number DOTDOT number RBRAC OF type  (7)
+
+	NUM  shift 50
+	MINUS  shift 52
+	PLUS  shift 53
+	.  error
+
+	number  goto 100
+	addop  goto 60
+
+
+state 68
+	declarations : declarations VAR identifier_list COLON type SEMICOLON .  (4)
+
+	.  reduce 4
+
+
+state 69
+	optional_var : VAR .  (20)
+
+	.  reduce 20
+
+
+state 70
+	arguments : LPAREN parameter_list . RPAREN  (16)
+
+	RPAREN  shift 101
+	.  error
+
+
+state 71
+	parameter_list : optional_var . identifier_list COLON type  (18)
+	parameter_list : optional_var . identifier_list COLON type SEMICOLON parameter_list  (19)
+
+	IDENTIFIER  shift 5
+	.  error
+
+	identifier_list  goto 102
+
+
+state 72
+	subprogram_head : FUNCTION IDENTIFIER arguments COLON . standard_type SEMICOLON  (14)
+
+	STRINGCONSTANT  shift 37
+	INTEGER  shift 38
+	REAL  shift 39
+	.  error
+
+	standard_type  goto 103
+
+
+state 73
+	subprogram_head : PROCEDURE IDENTIFIER arguments SEMICOLON .  (15)
+
+	.  reduce 15
+
+
+state 74
+	expression_list : expression .  (37)
+
+	.  reduce 37
+
+
+state 75
+	procedure_statement : IDENTIFIER LPAREN expression_list . RPAREN  (36)
+	expression_list : expression_list . COMMA expression  (38)
+
+	RPAREN  shift 104
+	COMMA  shift 105
+	.  error
+
+
+state 76
+	tail : LBRAC expression . RBRAC tail  (33)
+
+	RBRAC  shift 106
+	.  error
+
+
+state 77
+	factor : IDENTIFIER LPAREN . expression_list RPAREN  (49)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 74
+	expression_list  goto 107
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 78
+	factor : IDENTIFIER tail .  (48)
+
+	.  reduce 48
+
+
+state 79
+	factor : LPAREN expression . RPAREN  (52)
+
+	RPAREN  shift 108
+	.  error
+
+
+state 80
+	factor : NOT factor .  (53)
+
+	.  reduce 53
+
+
+state 81
+	statement : IF expression THEN . statement ELSE statement  (29)
+	statement : .  (31)
+
+	IDENTIFIER  shift 24
+	PBEGIN  shift 17
+	IF  shift 25
+	WHILE  shift 26
+	ELSE  reduce 31
+
+	compound_statement  goto 27
+	statement  goto 109
+	variable  goto 31
+	procedure_statement  goto 32
+
+
+state 82
+	expression : boolexpression AND . boolexpression  (40)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	boolexpression  goto 110
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 83
+	expression : boolexpression OR . boolexpression  (41)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	boolexpression  goto 111
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 84
+	relop : GE .  (62)
+
+	.  reduce 62
+
+
+state 85
+	relop : GT .  (59)
+
+	.  reduce 59
+
+
+state 86
+	relop : LE .  (61)
+
+	.  reduce 61
+
+
+state 87
+	relop : LT .  (58)
+
+	.  reduce 58
+
+
+state 88
+	relop : EQUAL .  (60)
+
+	.  reduce 60
+
+
+state 89
+	relop : notEQUAL .  (63)
+
+	.  reduce 63
+
+
+state 90
+	boolexpression : simple_expression relop . simple_expression  (43)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	simple_expression  goto 112
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 91
+	simple_expression : simple_expression addop . term  (45)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	term  goto 113
+	addop  goto 60
+	factor  goto 61
+
+
+state 92
+	mulop : SLASH .  (57)
+
+	.  reduce 57
+
+
+state 93
+	mulop : STAR .  (56)
+
+	.  reduce 56
+
+
+state 94
+	term : term mulop . factor  (47)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	addop  goto 60
+	factor  goto 114
+
+
+state 95
+	number : addop NUM .  (65)
+
+	.  reduce 65
+
+
+state 96
+	statement : WHILE expression DO . statement  (30)
+	statement : .  (31)
+
+	IDENTIFIER  shift 24
+	PBEGIN  shift 17
+	IF  shift 25
+	WHILE  shift 26
+	SEMICOLON  reduce 31
+	END  reduce 31
+	ELSE  reduce 31
+
+	compound_statement  goto 27
+	statement  goto 115
+	variable  goto 31
+	procedure_statement  goto 32
+
+
+state 97
+	statement_list : statement_list SEMICOLON statement .  (25)
+
+	.  reduce 25
+
+
+state 98
+	statement : variable ASSIGNMENT expression .  (26)
+
+	.  reduce 26
+
+
+state 99
+	subprogram_declaration : subprogram_head declarations subprogram_declarations compound_statement .  (13)
+
+	.  reduce 13
+
+
+state 100
+	type : ARRAY LBRAC number . DOTDOT number RBRAC OF type  (7)
+
+	DOTDOT  shift 116
+	.  error
+
+
+state 101
+	arguments : LPAREN parameter_list RPAREN .  (16)
+
+	.  reduce 16
+
+
+state 102
+	identifier_list : identifier_list . COMMA IDENTIFIER  (3)
+	parameter_list : optional_var identifier_list . COLON type  (18)
+	parameter_list : optional_var identifier_list . COLON type SEMICOLON parameter_list  (19)
+
+	COMMA  shift 8
+	COLON  shift 117
+	.  error
+
+
+state 103
+	subprogram_head : FUNCTION IDENTIFIER arguments COLON standard_type . SEMICOLON  (14)
+
+	SEMICOLON  shift 118
+	.  error
+
+
+state 104
+	procedure_statement : IDENTIFIER LPAREN expression_list RPAREN .  (36)
+
+	.  reduce 36
+
+
+state 105
+	expression_list : expression_list COMMA . expression  (38)
+
+	IDENTIFIER  shift 48
+	LPAREN  shift 49
+	NUM  shift 50
+	STRINGCONSTANT  shift 51
+	MINUS  shift 52
+	PLUS  shift 53
+	NOT  shift 54
+	.  error
+
+	number  goto 55
+	expression  goto 119
+	boolexpression  goto 57
+	simple_expression  goto 58
+	term  goto 59
+	addop  goto 60
+	factor  goto 61
+
+
+state 106
+	tail : LBRAC expression RBRAC . tail  (33)
+	tail : .  (34)
+
+	LBRAC  shift 46
+	RPAREN  reduce 34
+	SEMICOLON  reduce 34
+	COMMA  reduce 34
+	RBRAC  reduce 34
+	END  reduce 34
+	ASSIGNMENT  reduce 34
+	THEN  reduce 34
+	ELSE  reduce 34
+	DO  reduce 34
+	GE  reduce 34
+	GT  reduce 34
+	LE  reduce 34
+	LT  reduce 34
+	EQUAL  reduce 34
+	MINUS  reduce 34
+	notEQUAL  reduce 34
+	PLUS  reduce 34
+	SLASH  reduce 34
+	STAR  reduce 34
+	AND  reduce 34
+	OR  reduce 34
+
+	tail  goto 120
+
+
+state 107
+	expression_list : expression_list . COMMA expression  (38)
+	factor : IDENTIFIER LPAREN expression_list . RPAREN  (49)
+
+	RPAREN  shift 121
+	COMMA  shift 105
+	.  error
+
+
+state 108
+	factor : LPAREN expression RPAREN .  (52)
+
+	.  reduce 52
+
+
+state 109
+	statement : IF expression THEN statement . ELSE statement  (29)
+
+	ELSE  shift 122
+	.  error
+
+
+state 110
+	expression : boolexpression AND boolexpression .  (40)
+
+	.  reduce 40
+
+
+state 111
+	expression : boolexpression OR boolexpression .  (41)
+
+	.  reduce 41
+
+
+state 112
+	boolexpression : simple_expression relop simple_expression .  (43)
+	simple_expression : simple_expression . addop term  (45)
+
+	MINUS  shift 52
+	PLUS  shift 53
+	RPAREN  reduce 43
+	SEMICOLON  reduce 43
+	COMMA  reduce 43
+	RBRAC  reduce 43
+	END  reduce 43
+	THEN  reduce 43
+	ELSE  reduce 43
+	DO  reduce 43
+	AND  reduce 43
+	OR  reduce 43
+
+	addop  goto 91
+
+
+state 113
+	simple_expression : simple_expression addop term .  (45)
+	term : term . mulop factor  (47)
+
+	SLASH  shift 92
+	STAR  shift 93
+	RPAREN  reduce 45
+	SEMICOLON  reduce 45
+	COMMA  reduce 45
+	RBRAC  reduce 45
+	END  reduce 45
+	THEN  reduce 45
+	ELSE  reduce 45
+	DO  reduce 45
+	GE  reduce 45
+	GT  reduce 45
+	LE  reduce 45
+	LT  reduce 45
+	EQUAL  reduce 45
+	MINUS  reduce 45
+	notEQUAL  reduce 45
+	PLUS  reduce 45
+	AND  reduce 45
+	OR  reduce 45
+
+	mulop  goto 94
+
+
+state 114
+	term : term mulop factor .  (47)
+
+	.  reduce 47
+
+
+state 115
+	statement : WHILE expression DO statement .  (30)
+
+	.  reduce 30
+
+
+state 116
+	type : ARRAY LBRAC number DOTDOT . number RBRAC OF type  (7)
+
+	NUM  shift 50
+	MINUS  shift 52
+	PLUS  shift 53
+	.  error
+
+	number  goto 123
+	addop  goto 60
+
+
+state 117
+	parameter_list : optional_var identifier_list COLON . type  (18)
+	parameter_list : optional_var identifier_list COLON . type SEMICOLON parameter_list  (19)
+
+	ARRAY  shift 36
+	STRINGCONSTANT  shift 37
+	INTEGER  shift 38
+	REAL  shift 39
+	.  error
+
+	type  goto 124
+	standard_type  goto 41
+
+
+state 118
+	subprogram_head : FUNCTION IDENTIFIER arguments COLON standard_type SEMICOLON .  (14)
+
+	.  reduce 14
+
+
+state 119
+	expression_list : expression_list COMMA expression .  (38)
+
+	.  reduce 38
+
+
+state 120
+	tail : LBRAC expression RBRAC tail .  (33)
+
+	.  reduce 33
+
+
+state 121
+	factor : IDENTIFIER LPAREN expression_list RPAREN .  (49)
+
+	.  reduce 49
+
+
+state 122
+	statement : IF expression THEN statement ELSE . statement  (29)
+	statement : .  (31)
+
+	IDENTIFIER  shift 24
+	PBEGIN  shift 17
+	IF  shift 25
+	WHILE  shift 26
+	SEMICOLON  reduce 31
+	END  reduce 31
+	ELSE  reduce 31
+
+	compound_statement  goto 27
+	statement  goto 125
+	variable  goto 31
+	procedure_statement  goto 32
+
+
+state 123
+	type : ARRAY LBRAC number DOTDOT number . RBRAC OF type  (7)
+
+	RBRAC  shift 126
+	.  error
+
+
+state 124
+	parameter_list : optional_var identifier_list COLON type .  (18)
+	parameter_list : optional_var identifier_list COLON type . SEMICOLON parameter_list  (19)
+
+	SEMICOLON  shift 127
+	RPAREN  reduce 18
+
+
+state 125
+	statement : IF expression THEN statement ELSE statement .  (29)
+
+	.  reduce 29
+
+
+state 126
+	type : ARRAY LBRAC number DOTDOT number RBRAC . OF type  (7)
+
+	OF  shift 128
+	.  error
+
+
+state 127
+	parameter_list : optional_var identifier_list COLON type SEMICOLON . parameter_list  (19)
+	optional_var : .  (21)
+
+	VAR  shift 69
+	IDENTIFIER  reduce 21
+
+	parameter_list  goto 129
+	optional_var  goto 71
+
+
+state 128
+	type : ARRAY LBRAC number DOTDOT number RBRAC OF . type  (7)
+
+	ARRAY  shift 36
+	STRINGCONSTANT  shift 37
+	INTEGER  shift 38
+	REAL  shift 39
+	.  error
+
+	type  goto 130
+	standard_type  goto 41
+
+
+state 129
+	parameter_list : optional_var identifier_list COLON type SEMICOLON parameter_list .  (19)
+
+	.  reduce 19
+
+
+state 130
+	type : ARRAY LBRAC number DOTDOT number RBRAC OF type .  (7)
+
+	.  reduce 7
+
+
+43 terminals, 29 nonterminals
+66 grammar rules, 131 states
